@@ -6,62 +6,57 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Zombie Sniper</title>
 <style>
-*{box-sizing:border-box}
-body{margin:0;overflow:hidden;background:#111;color:white;font-family:Arial;touch-action:none}
-canvas{display:block;width:100vw;height:100dvh;touch-action:none}
-button{color:white;background:#263b50;border:2px solid #aaa;border-radius:12px;font-weight:bold;touch-action:none;user-select:none}
-#hud{position:fixed;top:8px;left:7px;right:7px;display:flex;justify-content:space-between;align-items:center;gap:4px;pointer-events:none}
-.info{background:#101d;padding:8px;border-radius:8px;font-size:12px}
-#shopBtn{pointer-events:auto;padding:9px}
-#controls{position:fixed;bottom:12px;left:10px;right:10px;display:flex;justify-content:space-between;align-items:end;pointer-events:none}
-#movePad{display:grid;grid-template-columns:48px 48px 48px;grid-template-rows:48px 48px 48px;gap:3px;pointer-events:auto}
-.moveBtn{font-size:22px;padding:0;background:#263b50dd}
-#actions{display:flex;gap:6px;pointer-events:auto;align-items:end}
-#fire{background:#a22;font-size:17px;padding:17px 13px}
-#scope{background:#245078;padding:14px}
-#message{position:fixed;top:65px;left:50%;transform:translateX(-50%);background:#111c;padding:8px;border-radius:8px;pointer-events:none;font-size:12px;white-space:nowrap}
-#shop{display:none;position:fixed;inset:0;background:#000d;align-items:center;justify-content:center;padding:12px}
-.panel{background:#202831;border:2px solid #aaa;border-radius:14px;padding:14px;width:min(370px,95vw);max-height:85vh;overflow:auto}
-.shophead{display:flex;justify-content:space-between;align-items:center}
-#close{background:#a22;font-size:20px;padding:7px 14px}
-.weapon{display:flex;justify-content:space-between;align-items:center;background:#36414c;padding:10px;margin:7px 0;border-radius:8px;gap:5px}
-.weapon button{padding:8px}
+*{box-sizing:border-box;touch-action:none}
+body{margin:0;background:#15191d;color:white;font-family:Arial;overflow:hidden}
+canvas{display:block;width:100vw;height:100dvh}
+#hud{position:absolute;top:8px;left:8px;right:8px;display:flex;gap:7px;align-items:center;justify-content:space-between;pointer-events:none}
+.info{background:#111c;padding:8px 10px;border-radius:9px;font-size:13px}
+button{border:0;border-radius:10px;background:#263b31;color:white;font-weight:bold;padding:12px}
+#shopBtn{pointer-events:auto;background:#b47a20}
+#controls{position:absolute;bottom:12px;left:12px;right:12px;display:flex;justify-content:space-between;align-items:end}
+#movePad{display:grid;grid-template-columns:48px 48px 48px;grid-template-rows:48px 48px;gap:4px}
+.move{background:#17252dcc;border:1px solid #71817b99;font-size:22px}
+#up{grid-column:2;grid-row:1}
+#left{grid-column:1;grid-row:2}
+#down{grid-column:2;grid-row:2}
+#right{grid-column:3;grid-row:2}
+#actions{display:flex;gap:8px;align-items:end}
+#fire{background:#a52b23;width:76px;height:76px;border-radius:50%;font-size:17px}
+#scope{background:#344c69}
+#shop{display:none;position:absolute;inset:0;background:#000b;align-items:center;justify-content:center;padding:18px;touch-action:pan-y}
+#shopPanel{background:#202b29;width:min(390px,100%);max-height:85dvh;overflow:auto;border:1px solid #63766c;border-radius:15px;padding:15px;touch-action:pan-y}
+.shoprow{display:flex;justify-content:space-between;align-items:center;background:#34413d;padding:11px;margin:8px 0;border-radius:9px;gap:8px}
+.shoprow button{background:#b27b27;white-space:nowrap}
+#close{float:right;background:#92352c}
 </style>
 </head>
 <body>
 <canvas id="game"></canvas>
 
 <div id="hud">
- <div class="info">💰 <span id="money">0</span></div>
- <div class="info">🧟 <span id="kills">0</span></div>
- <div class="info">🔫 <span id="weaponName">Súng cơ bản</span></div>
- <button id="shopBtn">🏪 SHOP</button>
+ <div class="info">🪙 <span id="money">0</span></div>
+ <div class="info">☠️ <span id="kills">0</span></div>
+ <div class="info" id="weaponName">Súng cơ bản</div>
+ <button id="shopBtn">SHOP</button>
 </div>
-
-<div id="message">Vuốt màn hình để xoay camera!</div>
 
 <div id="controls">
  <div id="movePad">
-  <div></div>
-  <button class="moveBtn" id="forward">⬆️</button>
-  <div></div>
-  <button class="moveBtn" id="left">⬅️</button>
-  <button class="moveBtn" id="backward">⬇️</button>
-  <button class="moveBtn" id="right">➡️</button>
+  <button class="move" id="up">▲</button>
+  <button class="move" id="left">◀</button>
+  <button class="move" id="down">▼</button>
+  <button class="move" id="right">▶</button>
  </div>
  <div id="actions">
-  <button id="scope">🔭 NGẮM</button>
-  <button id="fire">BẮN 🔥</button>
+  <button id="scope">NGẮM</button>
+  <button id="fire">BẮN</button>
  </div>
 </div>
 
 <div id="shop">
- <div class="panel">
-  <div class="shophead">
-   <h2>🔫 CỬA HÀNG SÚNG</h2>
-   <button id="close">✕</button>
-  </div>
-  <p>Tiền: <b id="shopMoney">0</b> xu</p>
+ <div id="shopPanel">
+  <button id="close">✕</button>
+  <h2>🔫 CỬA HÀNG SÚNG</h2>
   <div id="weapons"></div>
  </div>
 </div>
@@ -69,462 +64,314 @@ button{color:white;background:#263b50;border:2px solid #aaa;border-radius:12px;f
 <script>
 const canvas=document.getElementById("game");
 const ctx=canvas.getContext("2d");
-
 let W,H,D;
 function resize(){
  D=Math.min(devicePixelRatio||1,2);
- W=innerWidth;H=innerHeight;
- canvas.width=W*D;
- canvas.height=H*D;
- ctx.setTransform(D,0,0,D,0,0);
+ W=canvas.width=innerWidth*D;
+ H=canvas.height=innerHeight*D;
 }
-addEventListener("resize",resize);
 resize();
+addEventListener("resize",resize);
 
-// TRẠNG THÁI GAME
-let money=0,kills=0;
-let px=0,pz=0;
-let cameraYaw=0,cameraPitch=0;
-let scoped=false;
-let recoil=0,flash=0,lastShot=0;
-
-let gun=0;
-const guns=[
- ["Súng cơ bản",0,"#777"],
- ["Pistol",200,"#aaa"],
- ["SMG",500,"#555"],
- ["Rifle",1000,"#795b36"],
- ["Sniper",5000,"#343e49"],
- ["Golden Gun",10000,"#d5a900"],
- ["Dark Sniper",50000,"#542b77"],
- ["Legendary",100000,"#d42b35"]
-];
-let owned=[true,false,false,false,false,false,false,false];
-
+let money=0,kills=0,weapon=0,scoped=false;
+let px=0,pz=0,yaw=0,pitch=0,recoil=0;
+let pressed=new Set();
 let zombies=[];
+const guns=[
+ ["Súng cơ bản",0],
+ ["Pistol",200],
+ ["SMG",500],
+ ["Rifle",1000],
+ ["Sniper",5000],
+ ["Golden Gun",10000],
+ ["Dark Sniper",50000],
+ ["Legendary",100000]
+];
+const owned=new Set([0]);
+
+function hud(){
+ document.getElementById("money").textContent=money;
+ document.getElementById("kills").textContent=kills;
+ document.getElementById("weaponName").textContent=guns[weapon][0];
+}
 function spawn(){
  zombies.push({
-  x:(Math.random()-.5)*28,
-  z:10+Math.random()*30,
-  alive:true,
-  size:.8+Math.random()*.4
+  x:(Math.random()-.5)*15,
+  z:12+Math.random()*35
  });
 }
-for(let i=0;i<18;i++)spawn();
+for(let i=0;i<9;i++)spawn();
 
-// CHUYỂN TỌA ĐỘ THẾ GIỚI THÀNH GÓC NHÌN CAMERA
 function project(x,z){
- let ox=x-px;
- let oz=z-pz;
- let c=Math.cos(cameraYaw);
- let s=Math.sin(cameraYaw);
-
- let cx=ox*c-oz*s;
- let cz=ox*s+oz*c;
-
+ let dx=x-px,dz=z-pz;
+ let s=Math.sin(yaw),c=Math.cos(yaw);
+ let cx=dx*c-dz*s;
+ let cz=dx*s+dz*c;
  if(cz<1)return null;
-
- let scale=H/(cz+4);
+ let focal=H*.85;
+ let horizon=H*.44+pitch*H*.35;
  return {
-  x:W/2+cx*scale*.75,
-  y:H*.53-cz*scale*.24+cameraPitch*H*.7,
-  scale:scale,
+  x:W/2+cx*focal/cz,
+  y:horizon+focal*1.35/cz,
+  scale:focal/cz,
   depth:cz
  };
 }
 
-function rect(x,y,w,h,color){
- ctx.fillStyle=color;
- ctx.fillRect(x,y,w,h);
-}
-function circle(x,y,r,color){
- ctx.fillStyle=color;
- ctx.beginPath();
- ctx.arc(x,y,r,0,Math.PI*2);
- ctx.fill();
-}
-
-// VẼ CẢNH
-function drawWorld(){
- let sky=ctx.createLinearGradient(0,0,0,H*.7);
- sky.addColorStop(0,"#172b40");
- sky.addColorStop(.65,"#647b80");
- sky.addColorStop(1,"#d39a6b");
- ctx.fillStyle=sky;
+function sky(){
+ let g=ctx.createLinearGradient(0,0,0,H*.65);
+ g.addColorStop(0,"#607d91");
+ g.addColorStop(1,"#d0b99a");
+ ctx.fillStyle=g;
  ctx.fillRect(0,0,W,H);
+}
 
- circle(W*.8,H*.17,Math.min(W,H)*.05,"#f0c58a");
-
- // Các tòa nhà
- for(let i=-7;i<=7;i++){
-  for(let side of [-1,1]){
-   let wx=i*7+side*13;
-   let wz=23+Math.abs(i%3)*3;
-   let p=project(wx,wz);
-   if(!p)continue;
-
-   let bw=p.scale*7;
-   let bh=p.scale*(8+(Math.abs(i)%4)*2);
-
-   rect(p.x-bw/2,p.y-bh,bw,bh,"#34434c");
-
-   for(let a=0;a<3;a++){
-    for(let b=0;b<3;b++){
-     rect(p.x-bw/2+5+b*bw/4,p.y-bh+8+a*bh/4,4,6,"#c6a66b");
-    }
-   }
-  }
- }
-
- // Mặt đất
- let ground=ctx.createLinearGradient(0,H*.45,0,H);
- ground.addColorStop(0,"#626454");
- ground.addColorStop(1,"#252d30");
- ctx.fillStyle=ground;
- ctx.fillRect(0,H*.45,W,H*.55);
-
- // Các vạch đường phối cảnh
- ctx.strokeStyle="#888";
- ctx.lineWidth=2;
- for(let x=-30;x<=30;x+=5){
-  let p=project(x,20);
-  if(!p)continue;
-  ctx.beginPath();
-  ctx.moveTo(W/2+(p.x-W/2)*.05,H*.55);
-  ctx.lineTo(p.x,H);
-  ctx.stroke();
- }
-
- for(let z=4;z<35;z+=3){
-  let p=project(0,z);
-  if(!p)continue;
-  ctx.beginPath();
-  ctx.moveTo(0,p.y);
-  ctx.lineTo(W,p.y);
-  ctx.stroke();
+function city(){
+ for(let i=0;i<15;i++){
+  let x=i*W/14;
+  let h=H*(.10+(i*17%9)/100);
+  ctx.fillStyle=i%2?"#59656a":"#737b79";
+  ctx.fillRect(x,H*.43-h,W/17,h);
+  ctx.fillStyle="#d6c79c";
+  for(let j=0;j<3;j++)
+   ctx.fillRect(x+W*.008+j*W*.018,H*.43-h+15*D,W*.008,9*D);
  }
 }
 
-// VẼ ZOMBIE
+function roof(){
+ ctx.fillStyle="#777b79";
+ ctx.fillRect(0,H*.54,W,H*.46);
+
+ // Gạch lát bê tông, không có tia nối
+ ctx.strokeStyle="#555c59";
+ ctx.lineWidth=1.2*D;
+ for(let y=H*.57;y<H*1.2;y+=H*.055){
+  ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();
+ }
+ for(let x=-W;x<W*2;x+=W*.10){
+  ctx.beginPath();ctx.moveTo(x,H*.55);ctx.lineTo(x,H);ctx.stroke();
+ }
+
+ // Lan can sân thượng
+ ctx.fillStyle="#414c4b";
+ ctx.fillRect(0,H*.48,W,H*.025);
+ ctx.fillRect(0,H*.50,W,H*.012);
+ for(let x=0;x<W;x+=W*.09)
+  ctx.fillRect(x,H*.45,W*.008,H*.055);
+}
+
 function drawZombie(z){
- if(!z.alive)return;
  let p=project(z.x,z.z);
- if(!p)return;
-
- let s=p.scale*z.size*.65;
- if(s<2)return;
-
+ if(!p||p.x<-100||p.x>W+100||p.y>H*1.2)return;
+ let size=Math.max(5,p.scale*.55);
  ctx.save();
  ctx.translate(p.x,p.y);
+ ctx.scale(size,size);
 
- circle(0,s*.75,s*.28,"#252b27");
+ ctx.fillStyle="#343b32";
+ ctx.fillRect(-.28,-.2,.19,.5);
+ ctx.fillRect(.10,-.2,.19,.5);
 
- rect(-s*.22,s*.25,s*.16,s*.55,"#344b38");
- rect(s*.06,s*.25,s*.16,s*.55,"#344b38");
+ ctx.fillStyle="#597b48";
+ ctx.fillRect(-.38,-1.15,.76,1);
 
- rect(-s*.32,-s*.2,s*.64,s*.55,"#526e4d");
+ ctx.fillStyle="#688c52";
+ ctx.fillRect(-.65,-1.05,.25,.75);
+ ctx.fillRect(.40,-1.05,.25,.75);
 
- ctx.strokeStyle="#617b51";
- ctx.lineWidth=s*.12;
-
+ ctx.fillStyle="#86a45e";
  ctx.beginPath();
- ctx.moveTo(-s*.25,-s*.05);
- ctx.lineTo(-s*.5,s*.4);
- ctx.stroke();
+ ctx.arc(0,-1.42,.38,0,Math.PI*2);
+ ctx.fill();
 
- ctx.beginPath();
- ctx.moveTo(s*.25,-s*.05);
- ctx.lineTo(s*.5,s*.4);
- ctx.stroke();
-
- circle(0,-s*.38,s*.28,"#788b5c");
- circle(-s*.1,-s*.4,s*.04,"#f22");
- circle(s*.1,-s*.4,s*.04,"#f22");
- rect(-s*.1,-s*.25,s*.2,s*.04,"#241");
-
+ ctx.fillStyle="#d82020";
+ ctx.fillRect(-.19,-1.5,.11,.08);
+ ctx.fillRect(.10,-1.5,.11,.08);
  ctx.restore();
 }
 
-// TAY VÀ SÚNG
-function drawGun(){
- let x=W/2;
- let color=guns[gun][2];
+function gun(){
+ let scale=Math.min(1,Math.max(.65,H/700));
+ let x=W*.72,y=H-8*D+recoil;
+ ctx.save();
+ ctx.translate(x,y);
+ ctx.scale(scale*D,scale*D);
 
- ctx.fillStyle="#bd8765";
+ ctx.fillStyle="#c28c69";
+ ctx.fillRect(-40,-45,30,55);
+ ctx.fillRect(30,-42,28,48);
 
- // Tay trái
- ctx.beginPath();
- ctx.moveTo(x-120,H+20);
- ctx.lineTo(x-65,H-90+recoil);
- ctx.lineTo(x-20,H-55);
- ctx.lineTo(x-30,H+20);
- ctx.fill();
-
- // Tay phải
- ctx.beginPath();
- ctx.moveTo(x+120,H+20);
- ctx.lineTo(x+65,H-90+recoil);
- ctx.lineTo(x+20,H-55);
- ctx.lineTo(x+30,H+20);
- ctx.fill();
-
- // Thân súng
- rect(x-34,H-95+recoil,68,130,color);
- rect(x-12,H-190+recoil,24,110,color);
- rect(x-25,H-145+recoil,50,15,"#16191d");
- rect(x-14,H-158+recoil,28,13,"#56616a");
- rect(x-45,H-70+recoil,90,30,color);
-
- if(flash>0){
-  circle(x,H-205+recoil,18,"#ffc044");
-  flash--;
- }
- recoil*=.7;
+ ctx.fillStyle=weapon===5?"#d6ad35":weapon===6?"#24242e":"#30363b";
+ ctx.fillRect(-18,-65,65,22);
+ ctx.fillRect(5,-92,13,30);
+ ctx.fillStyle="#111";
+ ctx.fillRect(8,-112,8,22);
+ ctx.fillStyle="#777";
+ ctx.fillRect(10,-113,4,16);
+ ctx.fillStyle="#202326";
+ ctx.fillRect(0,-48,18,25);
+ ctx.restore();
 }
 
-// ỐNG NGẮM
-function drawScope(){
- if(!scoped)return;
-
- ctx.fillStyle="#000c";
+function crosshair(){
+ let x=W/2,y=H*.48;
+ let s=(scoped?12:9)*D;
+ ctx.strokeStyle="#fff";
+ ctx.lineWidth=2*D;
  ctx.beginPath();
- ctx.rect(0,0,W,H);
- ctx.arc(W/2,H*.43,Math.min(W,H)*.36,0,Math.PI*2,true);
- ctx.fill("evenodd");
-
- ctx.strokeStyle="#eee";
- ctx.lineWidth=2;
- ctx.beginPath();
- ctx.arc(W/2,H*.43,Math.min(W,H)*.36,0,Math.PI*2);
+ ctx.moveTo(x-s,y);ctx.lineTo(x+s,y);
+ ctx.moveTo(x,y-s);ctx.lineTo(x,y+s);
  ctx.stroke();
-
- ctx.beginPath();
- ctx.moveTo(W/2-45,H*.43);
- ctx.lineTo(W/2+45,H*.43);
- ctx.moveTo(W/2,H*.43-45);
- ctx.lineTo(W/2,H*.43+45);
- ctx.stroke();
+ ctx.fillStyle="#e33";
+ ctx.fillRect(x-1.5*D,y-1.5*D,3*D,3*D);
 }
 
-// VÒNG LẶP VẼ
 function draw(){
- ctx.clearRect(0,0,W,H);
- drawWorld();
+ sky();
+ city();
+ roof();
+ [...zombies].sort((a,b)=>b.z-a.z).forEach(drawZombie);
+ gun();
 
- zombies.sort((a,b)=>b.z-a.z);
- zombies.forEach(drawZombie);
-
- drawGun();
- drawScope();
-
- requestAnimationFrame(draw);
-}
-draw();
-
-// DI CHUYỂN BẰNG 4 NÚT
-const directions={
- forward:[0,1],
- backward:[0,-1],
- left:[-1,0],
- right:[1,0]
-};
-let pressed=new Set();
-let dx=0,dz=0;
-
-function updateDirection(){
- dx=0;dz=0;
-
- pressed.forEach(id=>{
-  dx+=directions[id][0];
-  dz+=directions[id][1];
- });
-
- let len=Math.hypot(dx,dz);
- if(len>1){dx/=len;dz/=len}
-}
-
-Object.keys(directions).forEach(id=>{
- let btn=document.getElementById(id);
-
- btn.addEventListener("pointerdown",e=>{
-  e.preventDefault();
-  btn.setPointerCapture(e.pointerId);
-  pressed.add(id);
-  updateDirection();
- });
-
- function stop(){
-  pressed.delete(id);
-  updateDirection();
+ if(scoped){
+  ctx.fillStyle="#000";
+  ctx.beginPath();
+  ctx.rect(0,0,W,H);
+  ctx.arc(W/2,H*.48,H*.28,0,Math.PI*2,true);
+  ctx.fill("evenodd");
+  ctx.strokeStyle="#111";
+  ctx.lineWidth=8*D;
+  ctx.beginPath();
+  ctx.arc(W/2,H*.48,H*.28,0,Math.PI*2);
+  ctx.stroke();
  }
+ crosshair();
+}
 
- btn.addEventListener("pointerup",stop);
- btn.addEventListener("pointercancel",stop);
- btn.addEventListener("lostpointercapture",stop);
-});
-
-// DI CHUYỂN THEO HƯỚNG CAMERA
 function movement(){
- let c=Math.cos(cameraYaw);
- let s=Math.sin(cameraYaw);
-
- px+=(dx*c-dz*s)*.13;
- pz+=(dx*s+dz*c)*.13;
-
- // Giới hạn vị trí
- px=Math.max(-45,Math.min(45,px));
- pz=Math.max(-20,Math.min(45,pz));
+ let speed=.12;
+ let dx=0,dz=0;
+ if(pressed.has("up"))dz+=speed;
+ if(pressed.has("down"))dz-=speed;
+ if(pressed.has("left"))dx-=speed;
+ if(pressed.has("right"))dx+=speed;
+ px+=dx*Math.cos(yaw)+dz*Math.sin(yaw);
+ pz+=dz*Math.cos(yaw)-dx*Math.sin(yaw);
 }
-setInterval(movement,30);
 
-// VUỐT ĐỂ XOAY CAMERA
-let lookId=null;
-let lastX=0,lastY=0;
-
-canvas.addEventListener("pointerdown",e=>{
- lookId=e.pointerId;
- lastX=e.clientX;
- lastY=e.clientY;
-});
-
-canvas.addEventListener("pointermove",e=>{
- if(e.pointerId!==lookId)return;
-
- let mx=e.clientX-lastX;
- let my=e.clientY-lastY;
-
- cameraYaw+=mx*.006;
- cameraPitch+=my*.004;
- cameraPitch=Math.max(-.5,Math.min(.5,cameraPitch));
-
- lastX=e.clientX;
- lastY=e.clientY;
-});
-
-function stopLook(){
- lookId=null;
+let last=0;
+function loop(t){
+ let dt=Math.min(40,t-last);
+ last=t;
+ movement();
+ recoil*=.75;
+ draw();
+ requestAnimationFrame(loop);
 }
-canvas.addEventListener("pointerup",stopLook);
-canvas.addEventListener("pointercancel",stopLook);
+requestAnimationFrame(loop);
 
-// BẮN
 function shoot(){
- if(Date.now()-lastShot<250)return;
- lastShot=Date.now();
-
- recoil=18;
- flash=3;
-
- let best=null;
- let dist=Infinity;
-
- zombies.forEach(z=>{
-  if(!z.alive)return;
+ recoil=-8*D;
+ let target=null,best=Infinity;
+ for(let z of zombies){
   let p=project(z.x,z.z);
-  if(!p)return;
-
-  let d=Math.hypot(p.x-W/2,p.y-H*.43);
-  if(d<dist){
-   dist=d;
-   best=z;
-  }
- });
-
- let range=Math.min(W,H)*(scoped?.13:.065);
-
- if(best&&dist<range){
-  best.alive=false;
-  money+=100;
-  kills++;
-  setTimeout(spawn,700);
-
-  document.getElementById("message").textContent="+100 xu! Hạ gục zombie!";
- }else{
-  document.getElementById("message").textContent="Trượt mục tiêu!";
+  if(!p)continue;
+  let d=Math.hypot(p.x-W/2,p.y-H*.48);
+  if(d<best){best=d;target=z;}
  }
-
- updateHUD();
- sound();
-}
-
-document.getElementById("fire").onclick=shoot;
-
-// ÂM THANH
-function sound(){
+ if(target&&best<Math.max(35*D,H*.075)){
+  zombies.splice(zombies.indexOf(target),1);
+  kills++;
+  money+=100;
+  spawn();
+  hud();
+ }
  try{
   let a=new AudioContext();
   let o=a.createOscillator();
   let g=a.createGain();
-
+  o.connect(g);g.connect(a.destination);
+  o.frequency.value=100;
   o.type="sawtooth";
-  o.frequency.value=90;
   g.gain.setValueAtTime(.12,a.currentTime);
-  g.gain.exponentialRampToValueAtTime(.001,a.currentTime+.13);
-
-  o.connect(g);
-  g.connect(a.destination);
-  o.start();
-  o.stop(a.currentTime+.13);
+  g.gain.exponentialRampToValueAtTime(.001,a.currentTime+.12);
+  o.start();o.stop(a.currentTime+.12);
  }catch(e){}
 }
 
-// NGẮM
+document.getElementById("fire").onclick=shoot;
 document.getElementById("scope").onclick=()=>{
  scoped=!scoped;
- document.getElementById("scope").textContent=scoped?"❌ BỎ NGẮM":"🔭 NGẮM";
+ document.getElementById("scope").style.background=scoped?"#a46a20":"#344c69";
 };
 
-// SHOP
-document.getElementById("shopBtn").onclick=()=>{
- document.getElementById("shop").style.display="flex";
- renderShop();
-};
+for(let id of ["up","down","left","right"]){
+ let b=document.getElementById(id);
+ b.onpointerdown=e=>{
+  e.preventDefault();
+  pressed.add(id);
+ };
+ b.onpointerup=b.onpointercancel=b.onpointerleave=()=>{
+  pressed.delete(id);
+ };
+}
 
-document.getElementById("close").onclick=()=>{
- document.getElementById("shop").style.display="none";
-};
+let dragging=false,lastX=0,lastY=0;
+canvas.addEventListener("pointerdown",e=>{
+ dragging=true;
+ lastX=e.clientX;
+ lastY=e.clientY;
+});
+canvas.addEventListener("pointermove",e=>{
+ if(!dragging)return;
+ let dx=e.clientX-lastX;
+ let dy=e.clientY-lastY;
+
+ // Đã đảo chiều vuốt cho đúng
+ yaw-=dx*.006;
+ pitch=Math.max(-.6,Math.min(.6,pitch-dy*.003));
+
+ lastX=e.clientX;
+ lastY=e.clientY;
+});
+canvas.addEventListener("pointerup",()=>dragging=false);
+canvas.addEventListener("pointercancel",()=>dragging=false);
 
 function renderShop(){
- document.getElementById("shopMoney").textContent=money;
  let box=document.getElementById("weapons");
  box.innerHTML="";
-
  guns.forEach((g,i)=>{
   let row=document.createElement("div");
-  row.className="weapon";
-
+  row.className="shoprow";
   let label=document.createElement("span");
-  label.textContent="🔫 "+g[0]+" ("+g[1]+" xu)";
-
-  let b=document.createElement("button");
-  b.textContent=owned[i]?(gun===i?"ĐANG DÙNG":"CHỌN"):"MUA";
-
-  b.onclick=()=>{
-   if(owned[i]){
-    gun=i;
-   }else if(money>=g[1]){
-    money-=g[1];
-    owned[i]=true;
-    gun=i;
-   }else{
-    alert("Bạn chưa đủ xu!");
-    return;
+  label.textContent=g[0]+" — "+g[1]+" xu";
+  let btn=document.createElement("button");
+  btn.textContent=owned.has(i)?(weapon===i?"ĐANG DÙNG":"CHỌN"):"MUA";
+  btn.onclick=()=>{
+   if(owned.has(i)){
+    weapon=i;hud();renderShop();return;
    }
-
-   updateHUD();
-   renderShop();
+   if(money>=g[1]){
+    money-=g[1];
+    owned.add(i);
+    weapon=i;
+    hud();renderShop();
+   }else{
+    btn.textContent="THIẾU XU";
+   }
   };
-
-  row.append(label,b);
+  row.append(label,btn);
   box.append(row);
  });
 }
-
-function updateHUD(){
- document.getElementById("money").textContent=money;
- document.getElementById("kills").textContent=kills;
- document.getElementById("weaponName").textContent=guns[gun][0];
-}
+document.getElementById("shopBtn").onclick=()=>{
+ renderShop();
+ document.getElementById("shop").style.display="flex";
+};
+document.getElementById("close").onclick=()=>{
+ document.getElementById("shop").style.display="none";
+};
+hud();
 </script>
 </body>
 </html>
