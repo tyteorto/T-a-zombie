@@ -1,0 +1,347 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Sniper Zombie FPS</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;overflow:hidden;background:#111;color:white;font-family:Arial;touch-action:none}
+canvas{display:block}
+#hud{position:fixed;top:10px;left:10px;background:#000b;padding:10px 14px;border-radius:10px;z-index:5;font-size:14px;line-height:1.8}
+#cross{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:25px;height:25px;z-index:4;pointer-events:none}
+#cross:before{content:"";position:absolute;left:12px;height:25px;width:1px;background:red}
+#cross:after{content:"";position:absolute;top:12px;width:25px;height:1px;background:red}
+#buttons{position:fixed;right:12px;bottom:24px;display:flex;flex-direction:column;gap:12px;z-index:8}
+button{background:#a51d1d;color:white;border:2px solid white;border-radius:13px;padding:15px;font-weight:bold;font-size:15px}
+#scopeBtn{background:#293d50}
+#joystick{position:fixed;left:25px;bottom:35px;width:115px;height:115px;border:2px solid #ffffff77;border-radius:50%;background:#ffffff18;z-index:7;touch-action:none}
+#stick{position:absolute;width:45px;height:45px;left:33px;top:33px;border-radius:50%;background:#ffffff88;border:2px solid white}
+#scope{display:none;position:fixed;inset:0;z-index:6;pointer-events:none;background:radial-gradient(circle at center,transparent 0%,transparent 34%,#000 35%,#000 100%)}
+#scope:before{content:"";position:absolute;width:70vw;height:70vw;max-height:70vh;max-width:70vh;border:9px solid #171717;border-radius:50%;left:50%;top:50%;transform:translate(-50%,-50%)}
+#scope:after{content:"";position:absolute;left:50%;top:50%;width:70vw;height:70vw;max-height:70vh;max-width:70vh;transform:translate(-50%,-50%);background:linear-gradient(transparent calc(50% - 1px),#111 calc(50% - 1px),#111 calc(50% + 1px),transparent calc(50% + 1px)),linear-gradient(90deg,transparent calc(50% - 1px),#111 calc(50% - 1px),#111 calc(50% + 1px),transparent calc(50% + 1px));border-radius:50%}
+#scopeText{position:fixed;top:8%;left:50%;transform:translateX(-50%);font-size:12px;color:white}
+#message{position:fixed;top:40%;width:100%;text-align:center;font-size:24px;font-weight:bold;text-shadow:2px 2px 4px black;z-index:9;pointer-events:none}
+</style>
+</head>
+<body>
+
+<div id="hud">
+🎯 SNIPER ZOMBIE<br>
+Điểm: <span id="score">0</span><br>
+Đạn: <span id="ammo">∞</span><br>
+❤️ Máu: <span id="health">100</span>%
+</div>
+
+<div id="cross"></div>
+<div id="scope"><div id="scopeText">SNIPER SCOPE • 4X</div></div>
+<div id="message">SNIPER ZOMBIE</div>
+
+<div id="joystick"><div id="stick"></div></div>
+
+<div id="buttons">
+<button id="scopeBtn">🔭 NGẮM</button>
+<button id="shoot">🔫 BẮN</button>
+</div>
+
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x8799a2);
+scene.fog=new THREE.Fog(0x8799a2,35,110);
+
+const camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,150);
+camera.position.set(0,11,18);
+camera.rotation.order='YXZ';
+
+const renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(innerWidth,innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));
+renderer.shadowMap.enabled=true;
+document.body.appendChild(renderer.domElement);
+
+scene.add(new THREE.HemisphereLight(0xffffff,0x454545,2));
+const sun=new THREE.DirectionalLight(0xffffff,2.5);
+sun.position.set(-15,30,15);
+sun.castShadow=true;
+scene.add(sun);
+
+function mat(c){return new THREE.MeshStandardMaterial({color:c,roughness:.8})}
+
+function box(x,y,z,w,h,d,c){
+ const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat(c));
+ m.position.set(x,y,z);
+ m.castShadow=true;
+ m.receiveShadow=true;
+ scene.add(m);
+ return m;
+}
+
+// Mặt đất và đường
+box(0,-.5,0,110,1,110,0x464b43);
+box(0,.04,0,13,.08,100,0x292d31);
+for(let z=-45;z<45;z+=9)box(0,.1,z,.18,.03,4,0xe2d6a4);
+
+// Nhà cửa
+for(let i=0;i<18;i++){
+ const side=i%2===0?-1:1;
+ const x=side*(13+Math.random()*12);
+ const z=-40+Math.floor(i/2)*10;
+ const h=7+Math.random()*12;
+ box(x,h/2,z,7,h,8,0x535e67);
+ for(let y=2;y<h-1;y+=3){
+  box(x-1,y,z+4.05,1,1,.1,0x9bb4be);
+  box(x+1,y,z+4.05,1,1,.1,0x9bb4be);
+ }
+}
+
+// Sân thượng
+box(0,9.5,18,17,1,12,0x50565b);
+box(-8,10.2,18,1,1.2,12,0x777777);
+box(8,10.2,18,1,1.2,12,0x777777);
+
+// SÚNG VÀ TAY
+const gun=new THREE.Group();
+camera.add(gun);
+
+function gm(c){return mat(c)}
+const metal=gm(0x24282d),black=gm(0x101317);
+const brown=gm(0x493322),skin=gm(0xb47d59);
+const sleeve=gm(0x344536);
+
+function gb(w,h,d,x,y,z,m){
+ const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);
+ o.position.set(x,y,z);gun.add(o);return o;
+}
+function gc(r1,r2,len,x,y,z,m,rot=0){
+ const o=new THREE.Mesh(new THREE.CylinderGeometry(r1,r2,len,16),m);
+ o.position.set(x,y,z);o.rotation.x=rot;gun.add(o);return o;
+}
+
+gb(.19,.19,1.05,.35,-.36,-1.05,metal);
+gb(.22,.22,.35,.35,-.43,-.63,brown);
+gb(.10,.25,.38,.35,-.55,-.63,brown);
+gc(.045,.055,.85,.35,-.34,-1.87,black,Math.PI/2);
+gc(.08,.08,.12,.35,-.34,-2.29,metal,Math.PI/2);
+gb(.13,.13,.48,.35,-.19,-1.05,black);
+gc(.12,.12,.09,.35,-.19,-.81,metal,Math.PI/2);
+gc(.12,.12,.09,.35,-.19,-1.29,metal,Math.PI/2);
+gb(.23,.27,.5,.35,-.37,-.42,brown);
+gb(.28,.35,.58,.04,-.65,-.68,sleeve);
+gb(.18,.14,.25,.22,-.49,-.83,skin);
+gb(.24,.32,.48,.68,-.61,-.92,sleeve);
+gb(.18,.14,.25,.52,-.43,-1.03,skin);
+gb(.12,.1,.25,.35,-.51,-1.05,metal);
+
+// ZOMBIE
+const zombies=[];
+
+function makeZombie(){
+ const g=new THREE.Group();
+ const green=mat(0x628b42);
+ const dark=mat(0x35402d);
+ const red=mat(0xff1717);
+
+ function part(w,h,d,x,y,z,m){
+  const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);
+  o.position.set(x,y,z);
+  o.castShadow=true;
+  o.userData.zombie=g;
+  g.add(o);
+  return o;
+ }
+
+ part(.65,.9,.4,0,1.3,0,green);
+ part(.48,.48,.48,0,2,0,green);
+ part(.12,.12,.05,-.13,2.08,-.25,red);
+ part(.12,.12,.05,.13,2.08,-.25,red);
+ const a=part(.22,.85,.22,-.48,1.35,0,green);
+ const b=part(.22,.85,.22,.48,1.35,0,green);
+ const l=part(.25,.7,.28,-.18,.35,0,dark);
+ const r=part(.25,.7,.28,.18,.35,0,dark);
+
+ g.position.set((Math.random()-.5)*11,0,-Math.random()*32-2);
+ scene.add(g);
+ zombies.push({g,health:2,a,b,l,r,phase:Math.random()*8});
+}
+
+for(let i=0;i<12;i++)makeZombie();
+
+let score=0,health=100,zoom=false,gameOver=false;
+const $=id=>document.getElementById(id);
+
+function update(){
+ $('score').textContent=score;
+ $('health').textContent=health;
+}
+function say(t){
+ $('message').textContent=t;
+ setTimeout(()=>{$('message').textContent='';},1000);
+}
+
+// Âm thanh súng
+let audio;
+function gunSound(){
+ try{
+  audio=audio||new(window.AudioContext||window.webkitAudioContext)();
+  if(audio.state==='suspended')audio.resume();
+  const buffer=audio.createBuffer(1,audio.sampleRate*.22,audio.sampleRate);
+  const data=buffer.getChannelData(0);
+  for(let i=0;i<data.length;i++)data[i]=(Math.random()*2-1)*(1-i/data.length);
+  const source=audio.createBufferSource();
+  source.buffer=buffer;
+  const filter=audio.createBiquadFilter();
+  filter.type='lowpass';filter.frequency.value=1000;
+  const gain=audio.createGain();
+  gain.gain.setValueAtTime(.8,audio.currentTime);
+  gain.gain.exponentialRampToValueAtTime(.01,audio.currentTime+.22);
+  source.connect(filter);filter.connect(gain);gain.connect(audio.destination);
+  source.start();
+ }catch(e){}
+}
+
+// BẮN VÔ HẠN
+const raycaster=new THREE.Raycaster();
+
+$('shoot').onclick=()=>{
+ if(gameOver)return;
+ gunSound();
+ gun.position.z=.12;
+ setTimeout(()=>gun.position.z=0,90);
+
+ raycaster.setFromCamera(new THREE.Vector2(0,0),camera);
+ const objects=[];
+ zombies.forEach(z=>z.g.traverse(o=>{if(o.isMesh)objects.push(o)}));
+ const hits=raycaster.intersectObjects(objects);
+
+ if(hits.length){
+  const z=hits[0].object.userData.zombie;
+  if(z){
+   const target=zombies.find(v=>v.g===z);
+   if(target){
+    target.health--;
+    if(target.health<=0){
+     scene.remove(z);
+     zombies.splice(zombies.indexOf(target),1);
+     score+=10;
+     update();
+     say('💥 TIÊU DIỆT! +10');
+     setTimeout(makeZombie,1000);
+    }else say('TRÚNG MỤC TIÊU!');
+   }
+  }
+ }else say('TRƯỢT RỒI!');
+};
+
+// Ống ngắm
+$('scopeBtn').onclick=()=>{
+ zoom=!zoom;
+ camera.fov=zoom?17:65;
+ camera.updateProjectionMatrix();
+ $('scope').style.display=zoom?'block':'none';
+ $('cross').style.display=zoom?'none':'block';
+ gun.visible=!zoom;
+ $('scopeBtn').textContent=zoom?'✖ BỎ NGẮM':'🔭 NGẮM';
+};
+
+// Joystick
+let moveX=0,moveY=0,joyActive=false;
+const joy=$('joystick'),stick=$('stick');
+
+joy.addEventListener('pointerdown',e=>{
+ joyActive=true;
+ joy.setPointerCapture(e.pointerId);
+ updateJoy(e);
+});
+joy.addEventListener('pointermove',e=>{
+ if(joyActive)updateJoy(e);
+});
+function updateJoy(e){
+ const r=joy.getBoundingClientRect();
+ let x=e.clientX-r.left-r.width/2;
+ let y=e.clientY-r.top-r.height/2;
+ const max=35,len=Math.hypot(x,y);
+ if(len>max){x=x/len*max;y=y/len*max}
+ moveX=x/max;moveY=y/max;
+ stick.style.transform=`translate(${x}px,${y}px)`;
+}
+function stopJoy(){
+ joyActive=false;moveX=0;moveY=0;
+ stick.style.transform='translate(0,0)';
+}
+joy.addEventListener('pointerup',stopJoy);
+joy.addEventListener('pointercancel',stopJoy);
+
+// Xoay camera
+let looking=false,lastX=0,lastY=0,yaw=0,pitch=-.3;
+
+renderer.domElement.addEventListener('pointerdown',e=>{
+ looking=true;lastX=e.clientX;lastY=e.clientY;
+});
+window.addEventListener('pointerup',()=>looking=false);
+renderer.domElement.addEventListener('pointermove',e=>{
+ if(!looking)return;
+ const dx=e.clientX-lastX,dy=e.clientY-lastY;
+ lastX=e.clientX;lastY=e.clientY;
+ yaw-=dx*.004;
+ pitch=Math.max(-1.15,Math.min(.2,pitch-dy*.004));
+ camera.rotation.set(pitch,yaw,0);
+});
+
+// Vòng lặp
+const clock=new THREE.Clock();
+
+function animate(){
+ requestAnimationFrame(animate);
+ const dt=Math.min(clock.getDelta(),.04);
+ const t=clock.elapsedTime;
+
+ if(!gameOver){
+  const speed=7*dt;
+  const forward=new THREE.Vector3(-Math.sin(yaw),0,-Math.cos(yaw));
+  const right=new THREE.Vector3(Math.cos(yaw),0,-Math.sin(yaw));
+  camera.position.addScaledVector(forward,-moveY*speed);
+  camera.position.addScaledVector(right,moveX*speed);
+  camera.position.x=Math.max(-6,Math.min(6,camera.position.x));
+  camera.position.z=Math.max(13,Math.min(22,camera.position.z));
+ }
+
+ zombies.forEach(z=>{
+  z.phase+=dt*3;
+  z.g.position.z+=dt*.65;
+  z.g.position.x+=Math.sin(t+z.phase)*dt*.15;
+  z.l.rotation.x=Math.sin(z.phase)*.5;
+  z.r.rotation.x=-Math.sin(z.phase)*.5;
+  z.a.rotation.x=Math.sin(z.phase)*.3;
+  z.b.rotation.x=-Math.sin(z.phase)*.3;
+
+  if(z.g.position.z>13){
+   z.g.position.z=-35-Math.random()*15;
+   z.g.position.x=(Math.random()-.5)*12;
+   health=Math.max(0,health-10);
+   update();
+   if(health<=0&&!gameOver){
+    gameOver=true;
+    say('💀 BẠN ĐÃ THUA!');
+   }
+  }
+ });
+
+ gun.position.y=-.48+Math.sin(t*9)*Math.hypot(moveX,moveY)*.012;
+ renderer.render(scene,camera);
+}
+animate();
+
+window.addEventListener('resize',()=>{
+ camera.aspect=innerWidth/innerHeight;
+ camera.updateProjectionMatrix();
+ renderer.setSize(innerWidth,innerHeight);
+});
+update();
+setTimeout(()=>say('🎯 TIÊU DIỆT ZOMBIE!'),1200);
+</script>
+</body>
+</html>
+  
