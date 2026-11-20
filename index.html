@@ -4,29 +4,30 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Sniper Zombie Survival</title>
+<title>SNIPER ZOMBIE</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;overflow:hidden;background:#111;color:white;font-family:Arial;touch-action:none}
-canvas{display:block}
-#hud{position:fixed;top:10px;left:10px;z-index:5;background:#000c;padding:11px;border-radius:12px;line-height:1.8;font-size:14px}
+body{margin:0;overflow:hidden;background:#52616a;color:white;font-family:Arial;touch-action:none}
+canvas{display:block;width:100%;height:100%;position:fixed;inset:0}
+#hud{position:fixed;top:10px;left:10px;z-index:5;background:#000c;padding:10px;border-radius:10px;line-height:1.8;font-size:14px;pointer-events:none}
 #buttons{position:fixed;right:12px;bottom:20px;z-index:8;display:flex;flex-direction:column;gap:10px}
 button{border:2px solid white;border-radius:12px;background:#a51d1d;color:white;padding:14px;font-weight:bold;font-size:14px}
-#shopBtn{position:fixed;right:12px;top:12px;z-index:9;background:#b17b14}
-#joystick{position:fixed;left:22px;bottom:30px;width:115px;height:115px;border:2px solid #aaa;border-radius:50%;background:#ffffff20;z-index:7;touch-action:none}
+#shopBtn{position:fixed;right:10px;top:10px;z-index:9;background:#a87514}
+#joystick{position:fixed;left:20px;bottom:28px;width:115px;height:115px;border:2px solid #ddd;border-radius:50%;background:#ffffff22;z-index:7;touch-action:none}
 #stick{position:absolute;width:44px;height:44px;left:33px;top:33px;background:#ffffff99;border-radius:50%;border:2px solid white}
 #scope{display:none;position:fixed;inset:0;z-index:6;pointer-events:none;background:radial-gradient(circle,transparent 0%,transparent 34%,#000 35%,#000 100%)}
 #scope:before{content:"";position:absolute;width:70vw;height:70vw;max-width:70vh;max-height:70vh;border:9px solid #333;border-radius:50%;left:50%;top:50%;transform:translate(-50%,-50%)}
-#scope:after{content:"";position:absolute;width:70vw;height:70vw;max-width:70vh;max-height:70vh;left:50%;top:50%;transform:translate(-50%,-50%);background:linear-gradient(transparent 49.8%,#171717 49.8%,#171717 50.2%,transparent 50.2%),linear-gradient(90deg,transparent 49.8%,#171717 49.8%,#171717 50.2%,transparent 50.2%);border-radius:50%}
-#message{position:fixed;top:42%;left:0;width:100%;text-align:center;font-size:24px;font-weight:bold;text-shadow:2px 2px 5px black;z-index:10;pointer-events:none}
-#shop{display:none;position:fixed;inset:0;background:#000d;z-index:20;overflow:auto;padding:18px}
-#shopPanel{max-width:450px;margin:25px auto;background:#242c32;border:2px solid #a88a43;border-radius:16px;padding:15px}
-.weapon{display:flex;align-items:center;gap:10px;background:#39434a;border-radius:10px;padding:11px;margin:9px 0}
-.weaponIcon{font-size:28px;width:42px;text-align:center}
-.weaponInfo{flex:1}
-.weaponInfo small{display:block;color:#ddd;margin-top:5px}
-.buy{padding:10px;background:#987018;min-width:85px}
-#hint{position:fixed;bottom:5px;left:0;width:100%;text-align:center;font-size:11px;z-index:4;pointer-events:none}
+#scope:after{content:"";position:absolute;width:70vw;height:70vw;max-width:70vh;max-height:70vh;left:50%;top:50%;transform:translate(-50%,-50%);border-radius:50%;background:linear-gradient(transparent 49.8%,#111 49.8%,#111 50.2%,transparent 50.2%),linear-gradient(90deg,transparent 49.8%,#111 49.8%,#111 50.2%,transparent 50.2%)}
+#message{position:fixed;top:40%;left:0;width:100%;text-align:center;font-size:23px;font-weight:bold;text-shadow:2px 2px 5px black;z-index:10;pointer-events:none}
+#shop{display:none;position:fixed;inset:0;background:#000e;z-index:20;overflow:auto;padding:15px}
+#panel{max-width:450px;margin:20px auto;background:#28343c;border:2px solid #c49a42;border-radius:15px;padding:15px}
+.weapon{display:flex;align-items:center;gap:10px;background:#3b4952;padding:10px;margin:9px 0;border-radius:10px}
+.weaponIcon{font-size:27px;width:40px;text-align:center}
+.info{flex:1}
+.info small{display:block;color:#ddd;margin-top:5px}
+.buy{background:#9b751d;padding:10px}
+#status{position:fixed;top:45%;width:100%;text-align:center;z-index:30;color:#fff;font-weight:bold;pointer-events:none}
+#hint{position:fixed;bottom:4px;left:0;width:100%;text-align:center;font-size:10px;z-index:4;pointer-events:none}
 </style>
 </head>
 <body>
@@ -41,7 +42,9 @@ button{border:2px solid white;border-radius:12px;background:#a51d1d;color:white;
 
 <button id="shopBtn">🏪 CỬA HÀNG</button>
 <div id="scope"></div>
-<div id="message">TIÊU DIỆT ZOMBIE!</div>
+<div id="message"></div>
+<div id="status">Đang tải game...</div>
+
 <div id="joystick"><div id="stick"></div></div>
 
 <div id="buttons">
@@ -49,228 +52,201 @@ button{border:2px solid white;border-radius:12px;background:#a51d1d;color:white;
 <button id="shoot">🔫 BẮN</button>
 </div>
 
-<div id="hint">Joystick: di chuyển • Vuốt màn hình: xoay nhìn</div>
+<div id="hint">Joystick: di chuyển • Vuốt màn hình: xoay camera</div>
 
 <div id="shop">
- <div id="shopPanel">
-  <h2>🏪 NGƯỜI BÁN SÚNG</h2>
-  <p>Chào chiến binh! Mua súng để chiến đấu mạnh hơn.</p>
-  <h3>💰 Số tiền: <span id="shopMoney">0</span> xu</h3>
+ <div id="panel">
+  <h2>🏪 CỬA HÀNG SÚNG</h2>
+  <p>Người bán: Chào chiến binh! Chọn súng của bạn.</p>
+  <h3>💰 Tiền: <span id="shopMoney">0</span> xu</h3>
   <div id="weaponList"></div>
-  <button id="closeShop" style="width:100%;background:#555">ĐÓNG CỬA HÀNG</button>
+  <button id="closeShop" style="width:100%;background:#555">ĐÓNG</button>
  </div>
 </div>
 
 <script type="module">
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
 
-// ==================== GAME ====================
+try {
+
+// ================= GAME 3D =================
 
 const scene=new THREE.Scene();
-scene.background=new THREE.Color(0x8799a2);
-scene.fog=new THREE.Fog(0x8799a2,40,120);
+scene.background=new THREE.Color(0x899ba7);
+scene.fog=new THREE.Fog(0x899ba7,45,120);
 
-const camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,150);
+const camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,200);
 camera.position.set(0,11,18);
 camera.rotation.order='YXZ';
+camera.rotation.set(-0.38,0,0);
+scene.add(camera);
 
 const renderer=new THREE.WebGLRenderer({antialias:true});
 renderer.setSize(innerWidth,innerHeight);
 renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
 renderer.shadowMap.enabled=true;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
 document.body.appendChild(renderer.domElement);
 
-scene.add(new THREE.HemisphereLight(0xffffff,0x444444,2));
+scene.add(new THREE.HemisphereLight(0xffffff,0x555555,2.2));
+
 const sun=new THREE.DirectionalLight(0xffffff,2.5);
 sun.position.set(-15,30,15);
 sun.castShadow=true;
 scene.add(sun);
 
-function mat(c){
- return new THREE.MeshStandardMaterial({color:c,roughness:.75});
+function material(color){
+ return new THREE.MeshStandardMaterial({color,roughness:.8});
 }
-function box(x,y,z,w,h,d,c){
- const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat(c));
+
+function cube(parent,x,y,z,w,h,d,color){
+ const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material(color));
  m.position.set(x,y,z);
  m.castShadow=true;
  m.receiveShadow=true;
- scene.add(m);
+ parent.add(m);
  return m;
 }
 
-// ==================== THÀNH PHỐ ====================
+// Mặt đất
+cube(scene,0,-.5,0,120,1,120,0x50564b);
 
-box(0,-.5,0,110,1,110,0x464b43);
-box(0,.04,0,13,.08,100,0x292d31);
+// Đường
+cube(scene,0,.02,0,13,.08,100,0x292e32);
 
 for(let z=-45;z<45;z+=9){
- box(0,.1,z,.18,.03,4,0xe2d6a4);
+ cube(scene,0,.08,z,.2,.03,4,0xf1dba0);
 }
 
+// Thành phố
 for(let i=0;i<18;i++){
  const side=i%2===0?-1:1;
- const x=side*(13+Math.random()*12);
+ const x=side*(14+Math.random()*12);
  const z=-40+Math.floor(i/2)*10;
- const h=7+Math.random()*12;
- box(x,h/2,z,7,h,8,0x535e67);
+ const h=7+Math.random()*13;
+
+ cube(scene,x,h/2,z,7,h,8,0x56616a);
 
  for(let y=2;y<h-1;y+=3){
-  box(x-1,y,z+4.05,1,1,.1,0x9bb4be);
-  box(x+1,y,z+4.05,1,1,.1,0x9bb4be);
+  cube(scene,x-1,y,z+4.05,1,1,.08,0xa9c2d1);
+  cube(scene,x+1,y,z+4.05,1,1,.08,0xa9c2d1);
  }
 }
 
 // Sân thượng
-box(0,9.5,18,17,1,12,0x50565b);
-box(-8,10.2,18,1,1.2,12,0x777777);
-box(8,10.2,18,1,1.2,12,0x777777);
+cube(scene,0,9.5,18,18,1,13,0x555b61);
+cube(scene,-8.5,10.2,18,.5,1.3,13,0x888888);
+cube(scene,8.5,10.2,18,.5,1.3,13,0x888888);
 
-// ==================== NGƯỜI BÁN SÚNG ====================
+// ================= NGƯỜI BÁN SÚNG =================
 
 const seller=new THREE.Group();
 scene.add(seller);
 seller.position.set(5,10,17);
 
-function sellerPart(w,h,d,x,y,z,c){
- const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat(c));
- m.position.set(x,y,z);
- seller.add(m);
-}
-sellerPart(.8,1.1,.5,0,1.2,0,0x263e35);
-sellerPart(.65,.65,.6,0,2.05,0,0xc58d65);
-sellerPart(.25,.25,.12,-.16,2.1,-.3,0x222222);
-sellerPart(.25,.25,.12,.16,2.1,-.3,0x222222);
-sellerPart(.25,.8,.25,-.55,1.3,0,0x263e35);
-sellerPart(.25,.8,.25,.55,1.3,0,0x263e35);
-sellerPart(.3,.8,.3,-.2,.35,0,0x303030);
-sellerPart(.3,.8,.3,.2,.35,0,0x303030);
+cube(seller,0,1.2,0,.8,1.1,.5,0x263e35);
+cube(seller,0,2.05,0,.65,.65,.6,0xc58d65);
+cube(seller,-.16,2.1,-.3,.12,.12,.06,0x222222);
+cube(seller,.16,2.1,-.3,.12,.12,.06,0x222222);
+cube(seller,-.5,1.3,0,.25,.8,.25,0x263e35);
+cube(seller,.5,1.3,0,.25,.8,.25,0x263e35);
+cube(seller,-.2,.35,0,.3,.7,.3,0x303030);
+cube(seller,.2,.35,0,.3,.7,.3,0x303030);
 
 // Bảng cửa hàng
-const sign=box(5,13.1,17,.1,.1,.1,0xffbb22);
-sign.scale.set(1,1,1);
 const signCanvas=document.createElement('canvas');
-signCanvas.width=512;signCanvas.height=128;
+signCanvas.width=512;
+signCanvas.height=128;
 const ctx=signCanvas.getContext('2d');
-ctx.fillStyle='#452b12';ctx.fillRect(0,0,512,128);
-ctx.fillStyle='#ffdd55';ctx.font='bold 48px Arial';
-ctx.textAlign='center';ctx.fillText('GUN SHOP',256,82);
-const texture=new THREE.CanvasTexture(signCanvas);
-const signMesh=new THREE.Mesh(
- new THREE.PlaneGeometry(4,1),
- new THREE.MeshBasicMaterial({map:texture})
-);
-signMesh.position.set(5,13,16.5);
-scene.add(signMesh);
+ctx.fillStyle='#38230d';
+ctx.fillRect(0,0,512,128);
+ctx.fillStyle='#ffdc56';
+ctx.font='bold 50px Arial';
+ctx.textAlign='center';
+ctx.fillText('GUN SHOP',256,83);
 
-// ==================== SÚNG ====================
+const sign=new THREE.Mesh(
+ new THREE.PlaneGeometry(4,1),
+ new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(signCanvas)})
+);
+sign.position.set(5,13,16.5);
+scene.add(sign);
+
+// ================= SÚNG VÀ TAY =================
 
 const gun=new THREE.Group();
 camera.add(gun);
-gun.position.set(0,0,0);
 
-function gunBox(w,h,d,x,y,z,c){
- const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat(c));
- m.position.set(x,y,z);
- gun.add(m);
- return m;
-}
-function gunCylinder(r1,r2,len,x,y,z,c){
- const m=new THREE.Mesh(
-  new THREE.CylinderGeometry(r1,r2,len,16),
-  mat(c)
- );
- m.position.set(x,y,z);
- m.rotation.x=Math.PI/2;
- gun.add(m);
- return m;
+function gunPart(parent,w,h,d,x,y,z,color){
+ return cube(parent,x,y,z,w,h,d,color);
 }
 
-// Tay áo và bàn tay luôn hiển thị
-function createHands(){
- gunBox(.30,.38,.62,-.08,-.68,-.65,0x344536);
- gunBox(.20,.16,.28,-.08,-.51,-.88,0xb47d59);
- gunBox(.30,.38,.62,.68,-.67,-.85,0x344536);
- gunBox(.20,.16,.28,.55,-.48,-1.02,0xb47d59);
-}
-createHands();
+// Hai tay người chơi
+gunPart(gun,.30,.38,.62,-.08,-.68,-.65,0x344536);
+gunPart(gun,.20,.16,.28,-.08,-.51,-.88,0xb47d59);
+gunPart(gun,.30,.38,.62,.68,-.67,-.85,0x344536);
+gunPart(gun,.20,.16,.28,.55,-.48,-1.02,0xb47d59);
 
 let gunModel=new THREE.Group();
 gun.add(gunModel);
 
-function clearGun(){
- gun.remove(gunModel);
- gunModel=new THREE.Group();
- gun.add(gunModel);
-}
-
-// Tạo 7 loại súng khác nhau
 const weapons=[
- {name:"Súng trường",price:200,color:0x494b43,barrel:1.0,stock:.45,scope:false},
- {name:"Súng ngắm dài",price:500,color:0x292b30,barrel:1.8,stock:.55,scope:true},
- {name:"Súng bán tự động",price:1000,color:0x745338,barrel:1.1,stock:.3,scope:true},
- {name:"Súng hạng nặng",price:5000,color:0x222222,barrel:2.2,stock:.7,scope:true},
- {name:"Súng quân sự",price:10000,color:0x45533d,barrel:1.6,stock:.9,scope:true},
- {name:"Súng công nghệ",price:50000,color:0x197a91,barrel:1.5,stock:.35,scope:true},
- {name:"Súng huyền thoại",price:100000,color:0x9b6820,barrel:2.0,stock:.65,scope:true}
+ {name:'Súng trường',price:200,color:0x494b43,barrel:1.0,scope:false},
+ {name:'Súng ngắm dài',price:500,color:0x292b30,barrel:1.8,scope:true},
+ {name:'Súng bán tự động',price:1000,color:0x745338,barrel:1.1,scope:true},
+ {name:'Súng hạng nặng',price:5000,color:0x222222,barrel:2.2,scope:true},
+ {name:'Súng quân sự',price:10000,color:0x45533d,barrel:1.6,scope:true},
+ {name:'Súng công nghệ',price:50000,color:0x197a91,barrel:1.5,scope:true},
+ {name:'Súng huyền thoại',price:100000,color:0x9b6820,barrel:2.0,scope:true}
 ];
 
 function buildGun(index){
- clearGun();
+ gun.remove(gunModel);
+ gunModel=new THREE.Group();
+ gun.add(gunModel);
+
  const w=weapons[index];
  const c=w.color;
 
- // Thân súng
- function part(a,b,d,x,y,z,color=c){
-  const m=new THREE.Mesh(new THREE.BoxGeometry(a,b,d),mat(color));
-  m.position.set(x,y,z);
-  gunModel.add(m);
- }
- function barrel(radius,length,z,color=0x17191c){
-  const m=new THREE.Mesh(
-   new THREE.CylinderGeometry(radius,radius,length,16),
-   mat(color)
-  );
-  m.rotation.x=Math.PI/2;
-  m.position.set(.35,-.34,z);
-  gunModel.add(m);
- }
+ gunPart(gunModel,.25,.23,.85,.35,-.36,-.95,c);
+ gunPart(gunModel,.22,.26,.5,.35,-.42,-.5,0x493322);
 
- part(.25,.23,.85,.35,-.36,-.95);
- part(.22,.26,w.stock,.35,-.42,-.5,0x493322);
- barrel(.055,w.barrel,-1.3);
- part(.13,.13,.5,.35,-.18,-1.0,0x151719);
+ const barrel=new THREE.Mesh(
+  new THREE.CylinderGeometry(.055,.055,w.barrel,16),
+  material(0x17191c)
+ );
+ barrel.rotation.x=Math.PI/2;
+ barrel.position.set(.35,-.34,-1.3);
+ gunModel.add(barrel);
+
+ gunPart(gunModel,.13,.13,.5,.35,-.18,-1,c);
 
  if(w.scope){
-  part(.13,.14,.55,.35,-.15,-1.05,0x111111);
-  part(.18,.18,.1,.35,-.15,-.79,0x777777);
-  part(.18,.18,.1,.35,-.15,-1.31,0x777777);
+  gunPart(gunModel,.13,.14,.55,.35,-.15,-1.05,0x111111);
+  gunPart(gunModel,.18,.18,.1,.35,-.15,-.79,0x777777);
+  gunPart(gunModel,.18,.18,.1,.35,-.15,-1.31,0x777777);
  }
 
  if(index===2){
-  part(.13,.38,.18,.35,-.59,-.85,0x222222);
+  gunPart(gunModel,.13,.38,.18,.35,-.59,-.85,0x222222);
  }
  if(index===3){
-  part(.32,.26,.6,.35,-.38,-.5,0x161616);
-  part(.1,.2,.35,.35,-.1,-1.1,0x555555);
+  gunPart(gunModel,.32,.26,.6,.35,-.38,-.5,0x161616);
  }
  if(index===4){
-  part(.29,.14,.8,.35,-.27,-.95,0x303c27);
-  part(.12,.3,.4,.35,-.56,-.9,0x222222);
+  gunPart(gunModel,.29,.14,.8,.35,-.27,-.95,0x303c27);
  }
  if(index===5){
-  part(.32,.18,.8,.35,-.3,-.98,0x22bbd5);
-  part(.2,.2,.2,.35,-.15,-.7,0x61eeff);
+  gunPart(gunModel,.32,.18,.8,.35,-.3,-.98,0x22bbd5);
+  gunPart(gunModel,.2,.2,.2,.35,-.15,-.7,0x61eeff);
  }
  if(index===6){
-  part(.3,.24,.9,.35,-.3,-1.0,0xffb52b);
-  part(.2,.2,.2,.35,-.12,-.8,0xffe77c);
-  part(.12,.12,.3,.35,-.48,-1.7,0xffdd55);
+  gunPart(gunModel,.3,.24,.9,.35,-.3,-1,0xffb52b);
+  gunPart(gunModel,.2,.2,.2,.35,-.12,-.8,0xffe77c);
  }
 }
 
-buildGun(-1);
-
-// ==================== ZOMBIE ====================
+// ================= ZOMBIE =================
 
 const zombies=[];
 
@@ -278,7 +254,7 @@ function makeZombie(){
  const g=new THREE.Group();
 
  function part(w,h,d,x,y,z,c){
-  const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat(c));
+  const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material(c));
   m.position.set(x,y,z);
   m.castShadow=true;
   m.userData.zombie=g;
@@ -294,41 +270,47 @@ function makeZombie(){
  part(.25,.7,.28,-.18,.35,0,0x35402d);
  part(.25,.7,.28,.18,.35,0,0x35402d);
 
- g.position.set((Math.random()-.5)*12,0,-Math.random()*35-3);
+ g.position.set((Math.random()-.5)*12,0,-8-Math.random()*24);
  scene.add(g);
  zombies.push({g,phase:Math.random()*8});
 }
+
 for(let i=0;i<12;i++)makeZombie();
 
-// ==================== TIỀN VÀ CỬA HÀNG ====================
+// ================= TRẠNG THÁI =================
 
 let money=0,score=0,health=100;
-let owned=[-1];
+let owned=[];
 let equipped=-1;
-let zoom=false,gameOver=false;
+let zoom=false;
+let gameOver=false;
 let shopOpen=false;
 
 const $=id=>document.getElementById(id);
 
 function updateHUD(){
- $('money').textContent=money;
+ $('money').textContent=money.toLocaleString('vi-VN');
  $('score').textContent=score;
  $('health').textContent=health;
  $('weaponName').textContent=equipped===-1?'Súng tập sự':weapons[equipped].name;
- $('shopMoney').textContent=money;
+ $('shopMoney').textContent=money.toLocaleString('vi-VN');
 }
 
-function showMessage(t){
+function say(t){
  $('message').textContent=t;
  setTimeout(()=>{$('message').textContent='';},1200);
 }
 
+// ================= CỬA HÀNG =================
+
 function renderShop(){
- $('shopMoney').textContent=money;
+ $('shopMoney').textContent=money.toLocaleString('vi-VN');
  $('weaponList').innerHTML='';
 
+ const icons=['🔫','🎯','🔫','💥','🪖','⚡','👑'];
+
  weapons.forEach((w,i)=>{
-  const ownedGun=owned.includes(i);
+  const isOwned=owned.includes(i);
   const selected=equipped===i;
 
   const div=document.createElement('div');
@@ -336,28 +318,25 @@ function renderShop(){
 
   const icon=document.createElement('div');
   icon.className='weaponIcon';
-  icon.textContent=['🔫','🎯','🔫','💥','🪖','⚡','👑'][i];
+  icon.textContent=icons[i];
 
   const info=document.createElement('div');
-  info.className='weaponInfo';
-  info.innerHTML='<b>'+w.name+'</b><small>Giá: '+w.price.toLocaleString('vi-VN')+' xu</small>';
+  info.className='info';
+  info.innerHTML='<b>'+w.name+'</b><small>'+w.price.toLocaleString('vi-VN')+' xu</small>';
 
   const button=document.createElement('button');
   button.className='buy';
-
-  if(selected)button.textContent='Đang dùng';
-  else if(ownedGun)button.textContent='Sử dụng';
-  else button.textContent='Mua';
+  button.textContent=selected?'Đang dùng':isOwned?'Sử dụng':'Mua';
 
   button.onclick=()=>{
-   if(!ownedGun){
+   if(!isOwned){
     if(money<w.price){
-     showMessage('❌ KHÔNG ĐỦ TIỀN!');
+     say('❌ KHÔNG ĐỦ TIỀN!');
      return;
     }
     money-=w.price;
     owned.push(i);
-    showMessage('🎉 MUA THÀNH CÔNG!');
+    say('🎉 MUA THÀNH CÔNG!');
    }
 
    equipped=i;
@@ -381,9 +360,10 @@ $('closeShop').onclick=()=>{
  $('shop').style.display='none';
 };
 
-// ==================== ÂM THANH ====================
+// ================= ÂM THANH =================
 
 let audio;
+
 function gunSound(){
  try{
   audio=audio||new(window.AudioContext||window.webkitAudioContext)();
@@ -414,7 +394,7 @@ function gunSound(){
  }catch(e){}
 }
 
-// ==================== BẮN: 1 VIÊN = 1 MẠNG ====================
+// ================= BẮN =================
 
 const raycaster=new THREE.Raycaster();
 
@@ -438,8 +418,8 @@ $('shoot').onclick=()=>{
  const hits=raycaster.intersectObjects(objects);
 
  if(hits.length){
-  const zombieGroup=hits[0].object.userData.zombie;
-  const target=zombies.find(z=>z.g===zombieGroup);
+  const group=hits[0].object.userData.zombie;
+  const target=zombies.find(z=>z.g===group);
 
   if(target){
    scene.remove(target.g);
@@ -447,33 +427,27 @@ $('shoot').onclick=()=>{
 
    score+=10;
    money+=100;
-
    updateHUD();
-   showMessage('💥 ZOMBIE BỊ HẠ! +100 XU');
+   say('💥 HẠ ZOMBIE! +100 XU');
 
    if(shopOpen)renderShop();
-
    setTimeout(makeZombie,800);
   }
- }else{
-  showMessage('TRƯỢT RỒI!');
- }
+ }else say('TRƯỢT RỒI!');
 };
 
-// ==================== ỐNG NGẮM ====================
+// ================= ỐNG NGẮM =================
 
 $('scopeBtn').onclick=()=>{
  zoom=!zoom;
  camera.fov=zoom?17:65;
  camera.updateProjectionMatrix();
-
  $('scope').style.display=zoom?'block':'none';
  gun.visible=!zoom;
-
  $('scopeBtn').textContent=zoom?'✖ BỎ NGẮM':'🔭 NGẮM';
 };
 
-// ==================== JOYSTICK ====================
+// ================= JOYSTICK =================
 
 let moveX=0,moveY=0,joyActive=false;
 const joy=$('joystick');
@@ -509,13 +483,14 @@ function stopJoy(){
  moveY=0;
  stick.style.transform='translate(0,0)';
 }
+
 joy.addEventListener('pointerup',stopJoy);
 joy.addEventListener('pointercancel',stopJoy);
 
-// ==================== XOAY CAMERA ====================
+// ================= XOAY CAMERA =================
 
 let looking=false,lastX=0,lastY=0;
-let yaw=0,pitch=-.3;
+let yaw=0,pitch=-.38;
 
 renderer.domElement.addEventListener('pointerdown',e=>{
  looking=true;
@@ -530,7 +505,6 @@ renderer.domElement.addEventListener('pointermove',e=>{
 
  const dx=e.clientX-lastX;
  const dy=e.clientY-lastY;
-
  lastX=e.clientX;
  lastY=e.clientY;
 
@@ -539,7 +513,7 @@ renderer.domElement.addEventListener('pointermove',e=>{
  camera.rotation.set(pitch,yaw,0);
 });
 
-// ==================== GAME LOOP ====================
+// ================= GAME LOOP =================
 
 const clock=new THREE.Clock();
 
@@ -576,7 +550,7 @@ function animate(){
 
    if(health<=0&&!gameOver){
     gameOver=true;
-    showMessage('💀 BẠN ĐÃ THUA!');
+    say('💀 BẠN ĐÃ THUA!');
    }
   }
  });
@@ -596,7 +570,15 @@ window.addEventListener('resize',()=>{
 
 updateHUD();
 renderShop();
-setTimeout(()=>showMessage('🎯 HÃY TIÊU DIỆT ZOMBIE!'),1200);
+
+$('status').style.display='none';
+say('🎯 TIÊU DIỆT ZOMBIE!');
+
+} catch(error) {
+ console.error(error);
+ document.getElementById('status').style.display='block';
+ document.getElementById('status').textContent='LỖI GAME: '+error.message;
+}
 </script>
 </body>
 </html>
